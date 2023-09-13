@@ -1,11 +1,57 @@
 import re
+import random
+import time
+
+LOG_LEVELS = ["INFO", "DEBUG", "WARN", "ERROR"]
+
+def fake_log():
+    log_level = random.choice(LOG_LEVELS)
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    messages = [
+        "Starting process...",
+        "Fetching data from server...",
+        "Service initialized.",
+        "Connection established.",
+        "Loading configuration...",
+        "Authentication successful."
+    ]
+    message = random.choice(messages)
+    print(f"[{timestamp}] [{log_level}] {message}")
+
+def show_content_with_log(chapter, page=0):
+    # Display a fake log before the content
+    fake_log()
+    time.sleep(random.uniform(0.2, 0.6))  # Random delay
+
+    show_content(chapter, page)
+
+    # Display a fake log after the content
+    time.sleep(random.uniform(0.2, 0.6))  # Random delay
+    fake_log()
+
+'''
+import keyboard
+
+def get_user_input():
+    print("\n按 'n' 翻到下一页, 'p' 翻到上一页, 'l' 显示章节列表或直接输入章节编号并按 'Enter'：")
+    while True:
+        if keyboard.is_pressed('n'):
+            return 'next'
+        elif keyboard.is_pressed('p'):
+            return 'prev'
+        elif keyboard.is_pressed('l'):
+            return 'list'
+        elif keyboard.is_pressed('\n'):
+            return input()  # 读取用户输入的章节编号
+
+'''
 
 
 def parse_chapters(filename):
     with open(filename, 'r', encoding='utf-8') as file:
         content = file.read()
 
-    chapter_pattern = r'第([0-9一二三四五六七八九十百千万亿]+)章 [^\n]+'
+    chapter_pattern = r'第([0-9零一二两三四五六七八九十百千万亿]+)章\s+[^\n]+' #更普遍地匹配任意空格（包括全角和半角）
 
     chapter_titles = [match.group() for match in re.finditer(chapter_pattern, content)]
 
@@ -45,7 +91,7 @@ def get_user_input():
 
 
 def main():
-    filename = "./test/万相之王.txt"
+    filename = "万相之王.txt"
     chapters = parse_chapters(filename)
     current_chapter = 0
     current_page = 0
@@ -55,10 +101,10 @@ def main():
 
         if user_input == 'next':
             current_page += 1
-            current_page = show_content(chapters[current_chapter], current_page)
+            current_page = show_content_with_log(chapters[current_chapter], current_page)
         elif user_input == 'prev':
             current_page -= 1
-            current_page = show_content(chapters[current_chapter], current_page)
+            current_page = show_content_with_log(chapters[current_chapter], current_page)
         elif user_input == 'list' or user_input == 'chapters':
             show_chapters(chapters)
         elif user_input.isdigit():
@@ -66,12 +112,11 @@ def main():
             if 0 <= selected_chapter < len(chapters):
                 current_chapter = selected_chapter
                 current_page = 0
-                show_content(chapters[current_chapter], current_page)
+                show_content_with_log(chapters[current_chapter], current_page)
             else:
                 print("无效的章节编号，请重试。")
         else:
             print("无效的输入，请重试。")
-
 
 
 
