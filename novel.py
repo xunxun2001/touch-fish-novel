@@ -1,8 +1,54 @@
 import re
 import random
 import time
+#import keyboard
 
 LOG_LEVELS = ["INFO", "DEBUG", "WARN", "ERROR"]
+def exit_logs():
+    messages = [
+        "Commencing detailed shutdown sequence...",
+        "Running pre-shutdown diagnostics...",
+        "Backing up current session's configurations and settings...",
+        "Releasing all active database connections. Closing database 'MainDB'...",
+        "Releasing secondary database connections from 'AnalyticsDB'...",
+        "Sending safe shutdown signals to all external APIs...",
+        "Flushing any pending logs to persistent storage. Ensuring no data loss...",
+        "Terminating and joining active threads. Total threads active: 37...",
+        "Sending stop signals to all microservices. Waiting for graceful terminations...",
+        "Closing all open file handles associated with modules 'DataProc', 'NetCore'...",
+        "Shutting down background workers. Workers active: 8...",
+        "Clearing cache and buffers from memory region '0x4F0000' to '0xAF12FF'...",
+        "Releasing network resources. Disconnecting from IP '192.168.0.102'...",
+        "Closing active socket connections. Sockets open: 23...",
+        "Sending termination signals to all connected clients. Clients active: 3...",
+        "Running garbage collection and ensuring optimal memory deallocation...",
+        "Ensuring all file I/O operations are complete. Waiting for confirmations...",
+        "Disconnecting from external services: 'AuthService', 'FileStoreAPI'...",
+        "Finalizing the shutdown sequence. Storing states and user data...",
+        "Creating a compressed archive of this session's logs...",
+        "Sending shutdown reports to monitoring services 'MonitX', 'GuardStat'...",
+        "Stopping all scheduled tasks. Deactivating cron job 'auto_backup.sh'...",
+        "Running final audit and security checks...",
+        "Cleaning up and removing all temporary directories from '/tmp/', '/app/cache/'...",
+        "Unbinding from all network ports and releasing IP reservations...",
+        "Releasing all OS-level resources. Sending shutdown signal to system...",
+        "Notifying all dependent services and parent systems. Awaiting acknowledgments...",
+        "Final checks: memory integrity check, disk space check, network report...",
+        "Program ready to terminate. Initiating countdown...",
+        "Shutdown in 5 seconds...",
+        "Shutdown in 4 seconds...",
+        "Shutdown in 3 seconds...",
+        "Shutdown in 2 seconds...",
+        "Shutdown in 1 second...",
+        "Program has been successfully terminated. Goodbye!"
+    ]
+
+    for message in messages:
+        log_level = "INFO"
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print(f"[{timestamp}] [{log_level}] {message}")
+        time.sleep(random.uniform(0.1, 0.3))
+
 
 def fake_log():
     log_level = random.choice(LOG_LEVELS)
@@ -26,6 +72,11 @@ def fake_log():
     print(f"[{timestamp}] [{log_level}] {message}")
 
 def show_content_with_log(chapter, page=0):
+    total_pages = get_total_pages(chapter[1])
+
+    # Display the page number and total pages
+    print(f"\n---  Page {page + 1}/{total_pages}  ---\n")
+
     # 将章节内容分为行
     lines = chapter[1].split('\n')
     num_lines = len(lines)
@@ -54,23 +105,28 @@ def show_content_with_log(chapter, page=0):
     # 返回页码，如果需要的话
     return page
 
-'''
-import keyboard
 
-def get_user_input():
-    print("\n按 'n' 翻到下一页, 'p' 翻到上一页, 'l' 显示章节列表或直接输入章节编号并按 'Enter'：")
-    while True:
-        if keyboard.is_pressed('n'):
-            return 'next'
-        elif keyboard.is_pressed('p'):
-            return 'prev'
-        elif keyboard.is_pressed('l'):
-            return 'list'
-        elif keyboard.is_pressed('\n'):
-            return input()  # 读取用户输入的章节编号
 
-'''
 
+# def get_user_input():
+#     print("\n按 'n' 翻到下一页, 'p' 翻到上一页, 'l' 显示章节列表或直接输入章节编号并按 'Enter'：")
+#     while True:
+#         if keyboard.is_pressed('n'):
+#             return 'next'
+#         elif keyboard.is_pressed('p'):
+#             return 'prev'
+#         elif keyboard.is_pressed('l'):
+#             return 'list'
+#         elif keyboard.is_pressed('\n'):
+#             return input()  # 读取用户输入的章节编号
+
+
+
+MAX_LINES_PER_PAGE = 50  # 设定每页的最大行数
+
+def get_total_pages(chapter):
+    # 根据章节内容和每页的最大行数来计算总页数
+    return -(-len(chapter.split('\n')) // MAX_LINES_PER_PAGE)  # 向上取整计算总页数
 
 def parse_chapters(filename):
     with open(filename, 'r', encoding='utf-8') as file:
@@ -111,9 +167,6 @@ def show_content(chapter, page=0):
     return page
 
 
-def get_user_input():
-    return input("\n请选择章节编号或使用'next'/'prev'翻页: ")
-
 
 def main():
     filename = "./test/万相之王.txt"
@@ -140,13 +193,18 @@ def main():
                 show_content_with_log(chapters[current_chapter], current_page)
             else:
                 print("无效的章节编号，请重试。")
+        elif user_input == 'q':
+            exit_logs()
+            break
         else:
             print("无效的输入，请重试。")
 
 
 
+
 def get_user_input():
-    return input("\n输入章节编号、'next'/'prev'翻页或 'list' 显示章节列表: ")
+    return input("\n输入章节编号、'next'/'prev'翻页、'list' 显示章节列表或 'q' 退出: ")
+
 
 
 if __name__ == "__main__":
