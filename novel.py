@@ -2,6 +2,11 @@ import re
 import random
 import time
 #import keyboard
+import signal
+def handler(signum, frame):
+    exit_logs()
+    print("\nUser terminated. Exiting gracefully...")
+    exit(0)
 
 LOG_LEVELS = ["INFO", "DEBUG", "WARN", "ERROR"]
 def exit_logs():
@@ -169,6 +174,9 @@ def show_content(chapter, page=0):
 
 
 def main():
+    # Setting the signal handler
+    signal.signal(signal.SIGINT, handler)
+
     filename = "./test/万相之王.txt"
     chapters = parse_chapters(filename)
     current_chapter = 0
