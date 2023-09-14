@@ -7,27 +7,52 @@ LOG_LEVELS = ["INFO", "DEBUG", "WARN", "ERROR"]
 def fake_log():
     log_level = random.choice(LOG_LEVELS)
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+
     messages = [
-        "Starting process...",
-        "Fetching data from server...",
-        "Service initialized.",
-        "Connection established.",
-        "Loading configuration...",
-        "Authentication successful."
+        "Initializing secure connection to the server at address 192.168.0.102:5000...",
+        "Fetching data from remote endpoint: /api/v2/fetch with headers {'User-Agent': 'CLI-Tool/1.0'}...",
+        "Received 200 OK from server after 142ms. Processing payload and mapping to internal structures...",
+        "Starting background task with ID #283728, expected to run for approximately 180 seconds...",
+        "Service successfully initialized. Listening on port 8080 with available threads: 8...",
+        "Successfully established connection with remote IP: 192.168.0.105 on port 3762. Encrypting using TLSv1.3...",
+        "Reading configuration data from /etc/config.json and merging with environment variables...",
+        "Authentication handshake successful. Generated token: 8f7328f7-a6ad-48d0-b271-5d475283a1b2, expires in 3600s...",
+        "Database connection established using driver pgsql. Querying table: users with SELECT * LIMIT 100...",
+        "Task with ID #283728 completed successfully after 162.5 seconds. Cleaning up resources and archiving logs...",
+        "Received signal: SIGTERM from process PID 872. Preparing to shut down gracefully after finalizing 3 pending tasks...",
+        "Writing audit logs to /var/log/audit.log. Total entries written: 3842. Backup to S3 bucket initiated..."
     ]
     message = random.choice(messages)
     print(f"[{timestamp}] [{log_level}] {message}")
 
 def show_content_with_log(chapter, page=0):
-    # Display a fake log before the content
-    fake_log()
-    time.sleep(random.uniform(0.2, 0.6))  # Random delay
+    # 将章节内容分为行
+    lines = chapter[1].split('\n')
+    num_lines = len(lines)
 
-    show_content(chapter, page)
+    # 确定在哪些行后插入伪装日志
+    log_positions = random.sample(range(1, num_lines), 3)  # 随机选3个位置插入日志，可根据需要调整
+    log_positions.sort()
 
-    # Display a fake log after the content
-    time.sleep(random.uniform(0.2, 0.6))  # Random delay
-    fake_log()
+    # Display multiple fake logs at the beginning
+    for _ in range(random.randint(5, 15)):
+        fake_log()
+        time.sleep(random.uniform(0.1, 0.3))
+
+    # 打印小说内容，并在特定位置插入日志
+    for i, line in enumerate(lines):
+        print(line)
+        if i in log_positions:
+            fake_log()
+            time.sleep(random.uniform(0.2, 0.6))
+
+    # Display multiple fake logs at the end
+    for _ in range(random.randint(5, 15)):
+        time.sleep(random.uniform(0.1, 0.3))
+        fake_log()
+
+    # 返回页码，如果需要的话
+    return page
 
 '''
 import keyboard
@@ -91,7 +116,7 @@ def get_user_input():
 
 
 def main():
-    filename = "万相之王.txt"
+    filename = "./test/万相之王.txt"
     chapters = parse_chapters(filename)
     current_chapter = 0
     current_page = 0
