@@ -11,7 +11,7 @@ class NovelReader:
 
     def __init__(self, filename):
         self.filename = filename  # 存储提供的文件名，以便后续使用
-        self.chapters = self.parse_chapters(filename)  # 解析文件，获取章节内容列表
+        self.chapters = NovelReader.parse_chapters(filename)  # 解析文件，获取章节内容列表
         self.current_chapter = 0  # 初始化当前章节的索引为0，表示从第一章开始
         self.current_page = 0  # 初始化当前页的索引为0，表示从每一章的第一页开始
         signal.signal(signal.SIGINT, self.handler)  # 设置信号处理器，以便在程序接收到中断信号时，执行特定的处理函数
@@ -104,7 +104,7 @@ class NovelReader:
         '''
         return -(-len(chapter.split('\n')) // self.MAX_LINES_PER_PAGE) # 向上取整计算总页数
 
-    def show_content_with_log(chapter, page=0):
+    def show_content_with_log(self, chapter, page=0):
         '''
         显示指定章节的内容，并在内容中插入伪装日志。
 
@@ -115,7 +115,7 @@ class NovelReader:
         :param page:要显示的页码，默认为0
         :return:返回当前页码，供后续操作使用
         '''
-        total_pages = chapter.get_total_pages(chapter[1])
+        total_pages = self.get_total_pages(chapter[1])
         # Display the page number and total pages
         print(f"\n---  Page {page + 1}/{total_pages}  ---\n")
 
@@ -124,25 +124,25 @@ class NovelReader:
         num_lines = len(lines)
 
         # 确定在哪些行后插入伪装日志
-        log_positions = random.sample(range(1, num_lines), 9)  # 随机选3个位置插入日志，可根据需要调整
+        log_positions = random.sample(range(1, num_lines), 5)  # 随机选3个位置插入日志，可根据需要调整
         log_positions.sort()
 
         # Display multiple fake logs at the beginning
         for _ in range(random.randint(5, 15)):
-            chapter.fake_log()
+            self.fake_log()
             time.sleep(random.uniform(0.1, 0.3))
 
         # 打印小说内容，并在特定位置插入日志
         for i, line in enumerate(lines):
             print(line)
             if i in log_positions:
-                chapter.fake_log()
+                self.fake_log()
                 time.sleep(random.uniform(0.2, 0.6))
 
         # Display multiple fake logs at the end
         for _ in range(random.randint(5, 15)):
             time.sleep(random.uniform(0.1, 0.3))
-            chapter.fake_log()
+            self.fake_log()
 
         # 返回页码，如果需要的话
         return page
@@ -175,8 +175,8 @@ class NovelReader:
 
         return list(zip(chapter_titles, chapters_content))
 
-    def show_chapters(chapters):
-        for idx, (title, _) in enumerate(chapters):
+    def show_chapters(self):
+        for idx, (title, _) in enumerate(self.chapters):
             print(f"{idx + 1}. {title}")
 
     def show_content(chapter, page=0):
