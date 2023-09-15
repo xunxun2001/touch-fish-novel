@@ -196,17 +196,17 @@ class NovelReader:
         return page
 
     def get_user_input(self):
-        return input("\n输入章节编号、'next'/'prev'翻页、'list' 显示章节列表或 'q' 退出: ")
+        return input("\nEnter chapter number, 'n'/'p' to navigate pages, 'list' to display chapter list, or 'q' to quit:")
 
     def run(self):
         while True:
             user_input = self.get_user_input()
 
-            if user_input == 'next':
+            if user_input == 'n':
                 self.current_page += 1
                 self.current_page = self.show_content_with_log(
                     self.chapters[self.current_chapter], self.current_page)
-            elif user_input == 'prev':
+            elif user_input == 'p':
                 self.current_page -= 1
                 self.current_page = self.show_content_with_log(
                     self.chapters[self.current_chapter], self.current_page)
