@@ -5,6 +5,7 @@ import time
 #import keyboard
 import signal
 import chardet
+import os
 
 def detect_encoding(filename):
     with open(filename, 'rb') as f:
@@ -264,6 +265,33 @@ class NovelReader:
                 print("无效的输入，请重试。")
 
 
+def list_files_in_directory(directory="./test"):
+    """Lists all files in the given directory."""
+    return [file for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
+
+def get_novel_from_user(directory="./test"):
+    """Displays the list of novels in the directory and lets the user choose one."""
+    novels = list_files_in_directory(directory)
+    if not novels:
+        print(f"No novels found in {directory}. Exiting...")
+        exit()
+
+    print("Available novels:")
+    for idx, novel in enumerate(novels, 1):
+        print(f"{idx}. {novel}")
+
+    while True:
+        selection = input("\nEnter the number of the novel you want to read or 'q' to quit: ").strip()
+        if selection.isdigit() and 1 <= int(selection) <= len(novels):
+            return os.path.join(directory, novels[int(selection) - 1])
+        elif selection.lower() == 'q':
+            print("Exiting...")
+            exit()
+        else:
+            print("Invalid choice. Please try again.")
+
+
 if __name__ == "__main__":
-    reader = NovelReader("./test/万相之王.txt")
+    chosen_novel_path = get_novel_from_user()
+    reader = NovelReader(chosen_novel_path)
     reader.run()
