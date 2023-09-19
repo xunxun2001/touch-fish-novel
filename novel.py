@@ -4,6 +4,12 @@ import random
 import time
 #import keyboard
 import signal
+import chardet
+
+def detect_encoding(filename):
+    with open(filename, 'rb') as f:
+        result = chardet.detect(f.read())
+        return result['encoding']
 
 
 class NovelReader:
@@ -117,8 +123,30 @@ class NovelReader:
         :return:返回当前页码，供后续操作使用
         '''
         total_pages = self.get_total_pages(chapter[1])
+
+        if page >= total_pages:
+            self.current_chapter += 1
+            if self.current_chapter >= len(self.chapters):  # Reached the end of the book
+                self.current_chapter -= 1
+                print("已经是最后一页了。")
+                return page - 1
+            self.current_page = 0
+            return self.show_content_with_log(self.chapters[self.current_chapter], 0)
+
+        elif page < 0:
+            self.current_chapter -= 1
+            if self.current_chapter < 0:  # Reached the beginning of the book
+                self.current_chapter = 0
+                print("已经是第一页了。")
+                return 0
+            self.current_page = self.get_total_pages(self.chapters[self.current_chapter]) - 1
+            return self.show_content_with_log(self.chapters[self.current_chapter], self.current_page)
+
         # Display the page number and total pages
-        print(f"\n---  Page {page + 1}/{total_pages}  ---\n")
+        #print(f"\n---  Page {page + 1}/{total_pages}  ---\n")
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print(
+            f"[{timestamp}] [INFO] Processing content... Chapter {self.current_chapter + 1}/{len(self.chapters)} Page {page + 1}/{total_pages}.")
 
         # 将章节内容分为行
         lines = chapter[1].split('\n')
@@ -145,6 +173,10 @@ class NovelReader:
             time.sleep(random.uniform(0.1, 0.3))
             self.fake_log()
 
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print(
+            f"[{timestamp}] [INFO] Processing content... Chapter {self.current_chapter + 1}/{len(self.chapters)} Page {page + 1}/{total_pages}.")
+
         # 返回页码，如果需要的话
         return page
 
@@ -161,7 +193,11 @@ class NovelReader:
         :param: filename: 要解析的文本文件的路径
         :return:返回一个列表，其中每个元素是一个元组，元组的第一个元素是章节标题，第二个元素是该章节的内容。
         '''
-        with open(filename, 'r', encoding='utf-8') as file:
+
+        # with open(filename, 'r', encoding='utf-8') as file:
+
+        encoding = detect_encoding(filename)
+        with open(filename, 'r', encoding=encoding, errors='replace') as file:
             content = file.read()
 
         chapter_pattern = r'第([0-9零一二两三四五六七八九十百千万亿]+)章\s+[^\n]+' #更普遍地匹配任意空格（包括全角和半角）
