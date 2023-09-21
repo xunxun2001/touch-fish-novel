@@ -23,22 +23,39 @@ class NovelReader:
         self.current_chapter = 0  # 初始化当前章节的索引为0，表示从第一章开始
         self.current_page = 0  # 初始化当前页的索引为0，表示从每一章的第一页开始
         signal.signal(signal.SIGINT, self.handler)  # 设置信号处理器，以便在程序接收到中断信号时，执行特定的处理函数
+        # Initialize the bookmark file path for the current novel
+        self.bookmark_file = filename + ".bookmark"
+        self.load_bookmark()
 
     def handler(self, signum, frame):
         """
-        处理接收到的信号，用于程序的优雅退出。
+        处理接收到的信号，保存书签，并优雅退出。
 
         当程序接收到一个中断信号（例如，用户按下 Ctrl+C）时，此方法会被调用。
-        它首先调用 exit_logs() 方法，输出关闭程序的日志，然后通知用户程序正在优雅地退出。
+        它在保存书签之后会调用 exit_logs() 方法，输出关闭程序的日志，然后通知用户程序正在优雅地退出。
         最后，它确保程序完全退出。
 
         :param signum:接收到的信号的标识符
         :param frame:当前栈帧对象
         """
+        self.save_bookmark()
         self.exit_logs()
         print("\nUser terminated. Exiting gracefully...")
         exit(0)
 
+    def save_bookmark(self):
+        """Save the current chapter and page to the bookmark file."""
+        with open(self.bookmark_file, 'w') as file:
+            file.write(f"{self.current_chapter},{self.current_page}")
+
+    def load_bookmark(self):
+        """Load the chapter and page from the bookmark file if it exists."""
+        if os.path.exists(self.bookmark_file):
+            with open(self.bookmark_file, 'r') as file:
+                data = file.read().split(',')
+                if len(data) == 2 and data[0].isdigit() and data[1].isdigit():
+                    self.current_chapter = int(data[0])
+                    self.current_page = int(data[1])
     def exit_logs(self):
         messages = [
             "Commencing detailed shutdown sequence...",
@@ -236,6 +253,8 @@ class NovelReader:
         return input("\nEnter chapter number, 'n'/'p' to navigate pages, 'list' to display chapter list, or 'q' to quit:")
 
     def run(self):
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print(f"[{timestamp}] [INFO] Starting from Chapter {self.current_chapter + 1} Page {self.current_page + 1}")
         while True:
             user_input = self.get_user_input()
 
@@ -259,6 +278,7 @@ class NovelReader:
                 else:
                     print("无效的章节编号，请重试。")
             elif user_input == 'q':
+                self.save_bookmark()
                 self.exit_logs()
                 break
             else:
@@ -267,7 +287,11 @@ class NovelReader:
 
 def list_files_in_directory(directory="./test"):
     """Lists all files in the given directory."""
-    return [file for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
+    return [file for file in os.listdir(directory)
+            if os.path.isfile(os.path.join(directory, file))
+            and file.endswith('.txt')
+            and not file.endswith('.txt.bookmark')]
+
 
 def get_novel_from_user(directory="./test"):
     """Displays the list of novels in the directory and lets the user choose one."""
